@@ -33,5 +33,5 @@ certain metadata. Here's what is currently suppoted:
        transcodes files       copies tags        copies album art
 mp3           X                   X                     X
 ogg           X                   X
-m4a          X
+m4a           X
 
