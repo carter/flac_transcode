@@ -1,0 +1,37 @@
+Installation:
+
+  - Make sure the following executables are in your path:
+    - flac
+    - lame (for MP3)
+    - oggenc2 (for ogg vorbis)
+    - afconvert (for M4A)
+
+  - Install the flacinfo-rb gem
+
+
+Usage: 
+
+  flac_transcode [-h|--help] input_file_or_directory
+  
+  flac_transcode some_folder -mp3-v0        # transcodes to just v0
+  flac_transcode some_folder -mp3-v2        # transcodes to just v2
+  flac_transcode some_folder -mp3-320       # transcodes to just 320 cbr
+  flac_transcode some_folder -m4a           # transcodes to AAC 320
+  flac_transcode some_folder -ogg           # transcodes to ogg q8
+  flac_transcode some_folder -m4a -ogg      # transcodes to AAC and Ogg vorbis
+  flac_transcode some_folder -all           # transcodes to MP3 v0 v2 320 m4a and ogg
+
+flac_transcode takes a directory containing FLAC audio files and transcodes them to a variety of formats. It
+preserves the file structure of the source directory including any album art or log files.
+
+
+Formats:
+
+flac_transcode tries to preserve as much data from the original FLAC files but we're not always able to copy
+certain metadata. Here's what is currently suppoted:
+
+       transcodes files       copies tags        copies album art
+mp3           X                   X                     X
+ogg           X                   X
+m4a          X
+
