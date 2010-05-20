@@ -1,0 +1,80 @@
+#!/usr/bin/env ruby
+require File.join(File.dirname(__FILE__), 'lib', 'flac_file')
+require File.join(File.dirname(__FILE__), 'lib', 'audio_directory')
+
+def help
+  help = "Usage: flac_transcode [-h|--help] input_file_or_directory
+  
+  This will trascode a flac folder/file into V0, V2, and 320 CBR.
+
+  Other uses:
+  
+  flac_transcode some_folder -mp3-v0        # transcodes to just v0
+  flac_transcode some_folder -mp3-v2        # transcodes to just v2
+  flac_transcode some_folder -mp3-320       # transcodes to just 320 cbr
+  flac_transcode some_folder -m4a           # transcodes to AAC 320
+  flac_transcode some_folder -ogg           # transcodes to ogg q8
+  flac_transcode some_folder -m4a -ogg      # transcodes to AAC and Ogg vorbis
+  flac_transcode some_folder -all           # transcodes to all"
+  puts help
+end
+
+# returns subarguments. for instance if i provide a folder as an argument, I
+# can expect one, none, or more than one subarguments:
+#
+# flac_transcode some_folder -aac -ogg another_folder -mp3-v0
+#
+# some_folder has 2 sub args, -aac, -ogg
+def subargs(i=0, args=ARGV)
+  if args[i+1] =~ /^-/ # starts with -
+    return [args[i+1]] + subargs(i+1, args)
+  else
+    return []
+  end
+end
+
+ARGV.each_with_index do |arg, i|
+
+  case arg
+  when '-h', '--help'
+    help
+  else
+    if arg =~ /^-/
+      # ignore it'll be processed by subargs
+    elsif File.directory?(arg)
+      f = AudioDirectory.open(arg)
+      subargs(i).each do |subarg|
+        case subarg
+        when /^-mp3/
+          if match = subarg.match(/^-mp3-v(\d)/)
+            quality = match[1]
+            puts "Converting to mp3 v#{quality}"
+            f.to_mp3(:quality => quality)
+          elsif match = subarg.match(/^-mp3-(\d*)/)
+            quality = match[1]
+            puts "Converting to mp3 #{quality}kbps"
+            f.to_mp3(:bitrate => quality, :cbr => true)
+          end
+        when /^-m4a/
+          f.to_m4a
+        when /^-ogg/
+          f.to_ogg
+        when /^-all/
+            f.to_mp3(:quality => '0')
+            f.to_mp3(:quality => '2')
+            f.to_mp3(:cbr => true, :bitrate => '320')
+            f.to_m4a
+            f.to_ogg
+        end
+      end
+      f.clean_dirty_wavs
+    elsif File.exists?(arg)
+      f = FlacFile.open(arg)
+      #f.to_ogg
+      f.to_mp3
+    else
+      puts "Invalid file"
+      help
+    end
+  end
+end
